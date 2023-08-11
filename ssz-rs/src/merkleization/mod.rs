@@ -1,3 +1,4 @@
+mod hashtree;
 mod node;
 mod proofs;
 
@@ -29,8 +30,10 @@ pub trait Merkleized {
 pub enum MerkleizationError {
     /// An error serializing a type while computing the hash tree.
     SerializationError(SerializeError),
-    /// More data was provided than expected
+    /// More data was provided than expected.
     InputExceedsLimit(usize),
+    /// Bad input used for serialization.
+    InvalidInput,
 }
 
 impl From<SerializeError> for MerkleizationError {
@@ -138,7 +141,7 @@ fn merkleize_chunks_with_virtual_padding(
         let depth = height - 1;
         // SAFETY: index is safe while depth == leaf_count.trailing_zeros() < MAX_MERKLE_TREE_DEPTH;
         // qed
-        return Ok(CONTEXT[depth as usize].try_into().expect("can produce a single root chunk"))
+        return Ok(CONTEXT[depth as usize].try_into().expect("can produce a single root chunk"));
     }
 
     let mut layer = chunks.to_vec();
@@ -228,7 +231,7 @@ pub fn merkleize(chunks: &[u8], limit: Option<usize>) -> Result<Node, Merkleizat
     let mut leaf_count = chunk_count.next_power_of_two();
     if let Some(limit) = limit {
         if limit < chunk_count {
-            return Err(MerkleizationError::InputExceedsLimit(limit))
+            return Err(MerkleizationError::InputExceedsLimit(limit));
         }
         leaf_count = limit.next_power_of_two();
     }
