@@ -20,14 +20,12 @@ fn sparse_hash_tree(
         let dist = (last - first) / BYTES_PER_CHUNK;
         let next_first = last;
         if dist > 1 {
-            let input = &hash_tree[first..];
-            let output = &mut hash_tree[last..];
-            hash(output, input, dist / 2);
+            let (input, output) = hash_tree.split_at_mut(last);
+            hash(output, &input[first..], dist / 2);
         }
         if dist & 1 == 1 {
-            let input = &hash_tree[(next_first - BYTES_PER_CHUNK)..];
-            let output = &mut hash_tree[last..];
-            hash_2_chunks(output, input, &CONTEXT[height]);
+            let (input, output) = hash_tree.split_at_mut(last);
+            hash_2_chunks(output, &input[next_first - BYTES_PER_CHUNK..], &CONTEXT[height]);
         }
         first = next_first;
     }
